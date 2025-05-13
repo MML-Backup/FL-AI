@@ -1,0 +1,16 @@
+```json
+{
+  "name": "fl-ai-project",
+  "version": "1.0.0",
+  "description": "Frontend and Backend Functions for FL AI App",
+  "scripts": {
+    "build": "echo 'No specific build script needed for this simple setup'"
+  },
+  "dependencies": {
+    "node-fetch": "^2.6.1"  // <-- node-fetch লাইব্রেরিটি Dependency হিসেবে যোগ করা হয়েছে
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
+```
