@@ -1,4 +1,4 @@
-const OPENROUTER_API_KEY = "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"; // Replace with your actual API key
+const OPENROUTER_API_KEY = "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"; // Replace with your actual API key
 const HTTP_REFERER = "https://mml-backup.github.io/FL-AI/"; // Replace with your domain
 const SITE_NAME = "FL AI"; // Your site name (using ASCII for headers)
 
