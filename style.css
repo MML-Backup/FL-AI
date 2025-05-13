@@ -1,0 +1,198 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Inter", sans-serif;
+  background-color: #0d0d0d;
+  color: #fff;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.container {
+  text-align: center;
+  max-width: 700px;
+  width: 100%;
+}
+
+.title {
+  font-size: 32px;
+  font-weight: 600;
+  color: #0d6efd;
+  margin-bottom: 5px;
+}
+
+.subtitle {
+  font-size: 16px;
+  color: #bbb;
+  margin-bottom: 25px;
+}
+
+.chat-box {
+  background-color: #1a1a1a;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+  max-height: 400px;
+  overflow-y: auto;
+  margin-bottom: 15px; /* ইনপুট এরিয়া থেকে একটু দূরত্ব */
+}
+
+.input-wrapper {
+  display: flex;
+  align-items: center;
+  background-color: #2a2a2a;
+  border-radius: 999px;
+  padding: 12px 18px;
+  gap: 12px;
+  flex-wrap: wrap; /* ছোট স্ক্রিনে এলিমেন্টগুলো নিচে নিচে আসবে */
+}
+
+.input-wrapper input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 16px;
+  outline: none;
+  min-width: 150px; /* ছোট স্ক্রিনে ইনপুট ফিল্ড যাতে খুব ছোট না হয়ে যায় */
+}
+
+.icon-btn {
+  background-color: #3b3b3b;
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0; /* ছোট স্ক্রিনে বাটনগুলো যাতে না ছোট হয়ে যায় */
+}
+
+.icon-btn:hover {
+  background-color: #555;
+}
+
+.icon-btn svg {
+  stroke: #fff;
+  width: 18px;
+  height: 18px;
+}
+
+.file-upload input[type="file"] {
+  display: none;
+}
+
+/* মডেল সিলেকশন বাটনের স্টাইল */
+.model-selector {
+  padding: 8px 12px;
+  background-color: #3b3b3b;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #fff;
+  white-space: nowrap; /* টেক্সট এক লাইনে থাকবে */
+  flex-shrink: 0; /* ছোট স্ক্রিনে এটিও যাতে না ছোট হয়ে যায় */
+  transition: background-color 0.2s ease; /* হোভার ইফেক্ট */
+}
+
+.model-selector:hover {
+  background-color: #555;
+}
+
+
+.response {
+  margin-top: 20px; /* এই স্টাইলটি সম্ভবত ব্যবহার হচ্ছে না, চ্যাট বক্সের মধ্যেই মেসেজ দেখাচ্ছে */
+}
+
+.user-message {
+  background-color: #0d6efd;
+  color: #fff;
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  text-align: right;
+  word-wrap: break-word; /* লম্বা শব্দ ভাঙতে */
+}
+
+.ai-message {
+  background-color: #1f1f1f;
+  color: #e2e2e2;
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  text-align: left;
+  word-wrap: break-word; /* লম্বা শব্দ ভাঙতে */
+}
+
+.loading-spinner {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #0d6efd;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+  margin-right: 8px;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* --- মোবাইল স্ক্রিনের জন্য মিডিয়া ক্যোয়ারি --- */
+/* যখন স্ক্রিনের সর্বোচ্চ প্রস্থ 600px বা তার কম হবে */
+@media (max-width: 600px) {
+  .container {
+    padding: 10px; /* ছোট স্ক্রিনের জন্য প্যাডিং কমানো হলো */
+  }
+
+  .title {
+    font-size: 24px; /* টাইটেলের ফন্ট সাইজ ছোট করা হলো */
+  }
+
+  .subtitle {
+    font-size: 14px; /* সাবটাইটেলের ফন্ট সাইজ ছোট করা হলো */
+  }
+
+  .input-wrapper {
+    flex-direction: column; /* ছোট স্ক্রিনে এলিমেন্টগুলো উপরে নিচে আসবে */
+    align-items: stretch; /* এলিমেন্টগুলো পুরো প্রস্থ জুড়ে দেখাবে */
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .input-wrapper input {
+    font-size: 14px;
+    padding: 8px;
+    min-width: unset; /* ছোট স্ক্রিনে min-width এর দরকার নেই */
+  }
+
+   .icon-btn,
+   .model-selector {
+      width: 100%; /* ছোট স্ক্রিনে পুরো প্রস্থ নেবে */
+      text-align: center; /* লেখা বা আইকন সেন্টারে আসবে */
+      justify-content: center; /* ফ্লেক্স এলিমেন্ট সেন্টারে আনতে */
+      padding: 10px; /* প্যাডিং যোগ করা হলো ক্লিক করতে সুবিধা হবে */
+   }
+
+    .icon-btn svg {
+        margin: 0 auto; /* svg কে সেন্টারে আনতে */
+    }
+     .file-upload label {
+        width: 100%; /* Label যাতে পুরো প্রস্থ নেয় */
+     }
+}

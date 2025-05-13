@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ᖴᒪ.AI - Your AI Companion</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="manifest" href="/manifest.json"> <link rel="stylesheet" href="style.css"> <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="title">ᖴᒪ.ᗩI</div>
+    <div class="subtitle">Your AI Companion</div>
+    <div class="chat-box" id="chatBox">
+      </div>
+    <div class="input-wrapper">
+      <input type="text" id="userInput" placeholder="Ask anything..." />
+      <div class="icon-btn" title="Voice Input" id="voiceIcon">
+        <div data-lucide="mic"></div>
+      </div>
+      <label class="icon-btn file-upload" for="fileUpload" title="Upload File">
+        <div data-lucide="paperclip"></div>
+        <input type="file" id="fileUpload" /> </label>
+      <div class="model-selector" id="modelSelector">
+        </div>
+      <div class="icon-btn" onclick="search()" title="Search">
+        <div data-lucide="search"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script> </body>
+</html>
