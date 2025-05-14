@@ -22,7 +22,6 @@ body {
   width: 100%;
   display: flex;
   flex-direction: column;
-  /* justify-content center এর বদলে flex-start করা হলো */
   justify-content: flex-start; /* Align items to the start (top) */
   align-items: center;     /* horizontally center inside container */
   flex-grow: 1; /* Allow container to take up available space in body */
@@ -46,7 +45,9 @@ body {
   border-radius: 16px;
   padding: 20px;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
-  flex-grow: 1; /* Allow chat-box to take up available space in container */
+  /* flex-grow 1 সরিয়ে নির্দিষ্ট height সেট করা হলো */
+  /* flex-grow: 1; */
+  height: 350px; /* চ্যাটবক্সের নির্দিষ্ট উচ্চতা সেট করা হলো */
   overflow-y: auto; /* Add scrollbar when content overflows */
   /* margin-bottom remove করা হয়েছে */
   display: flex; /* Use flexbox for chat messages */
@@ -54,10 +55,11 @@ body {
   /* max-height remove করা হয়েছে আগের উত্তরেই */
 }
 
-/* Adjust max-height for chat-box on larger screens if needed, or rely on flex-grow */
+/* Adjust height for chat-box on larger screens if needed */
 @media (min-width: 601px) {
     .chat-box {
-        /* max-height remove করা হয়েছে আগের উত্তরেই */
+        /* প্রয়োজনে এখানে অন্য height বা max-height সেট করতে পারেন */
+        height: 400px; /* উদাহরণ: বড় স্ক্রিনের জন্য একটু বেশি উচ্চতা */
     }
 }
 
@@ -182,7 +184,6 @@ body {
 
   .container {
       padding: 0; /* Remove container padding as body has padding */
-      /* justify-content flex-start করা হয়েছে */
       justify-content: flex-start;
   }
 
@@ -196,6 +197,8 @@ body {
 
   .chat-box {
       padding: 15px; /* Slightly less padding for chat box */
+      /* নির্দিষ্ট height সেট করা হলো */
+      height: 250px; /* মোবাইল স্ক্রিনের জন্য একটু কম উচ্চতা */
       /* max-height remove করা হয়েছে আগের উত্তরেই */
       /* margin-bottom remove করা হয়েছে */
   }
