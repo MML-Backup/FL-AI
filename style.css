@@ -47,18 +47,17 @@ body {
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
   flex-grow: 1; /* Allow chat-box to take up available space in container */
   overflow-y: auto; /* Add scrollbar when content overflows */
-  margin-bottom: 15px;
+  /* margin-bottom remove করা হলো */
+  /* margin-bottom: 15px; */
   display: flex; /* Use flexbox for chat messages */
   flex-direction: column; /* Stack messages vertically */
-  /* max-height remove করা হলো */
-  /* max-height: 400px; Keep a max height for chat box */
+  /* max-height remove করা হয়েছে আগের উত্তরেই */
 }
 
 /* Adjust max-height for chat-box on larger screens if needed, or rely on flex-grow */
 @media (min-width: 601px) {
     .chat-box {
-        /* max-height remove করা হলো */
-        /* max-height: 500px; Example: slightly more height on larger screens */
+        /* max-height remove করা হয়েছে আগের উত্তরেই */
     }
 }
 
@@ -195,8 +194,9 @@ body {
 
   .chat-box {
       padding: 15px; /* Slightly less padding for chat box */
-      /* max-height remove করা হলো */
-      /* max-height: 300px; Adjust max height for mobile chat box */
+      /* max-height remove করা হয়েছে আগের উত্তরেই */
+      /* margin-bottom remove করা হলো */
+      /* margin-bottom: 15px; */
   }
 
   .input-wrapper {
