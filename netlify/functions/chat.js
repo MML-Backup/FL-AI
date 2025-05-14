@@ -1,27 +1,29 @@
-// netlify/functions/chat.js
-const fetch = require('node-fetch'); // node-fetch লাইব্রেরিটি Node.js এ fetch ব্যবহারের জন্য দরকার হতে পারে
+// api/chat.js
+// Vercel Functions Node.js Runtime এ সাধারণত global fetch পাওয়া যায়, node-fetch require নাও লাগতে পারে
+// তবে package.json এ dependency যেহেতু আছে, রাখলে ক্ষতি নেই
+const fetch = require('node-fetch');
 
-exports.handler = async function(event, context) {
-  // API Key টি Netlify Environment Variables থেকে নিরাপদে পড়ুন
+// এই ফাংশনটি Vercel Functions এ API endpoint হিসেবে কাজ করবে
+export default async function handler(req, res) {
+  // API Key টি Vercel Environment Variables থেকে নিরাপদে পড়ুন
   const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
-  const SITE_REFERER = process.env.YOUR_SITE_URL; // Netlify বা আপনার সাইটের URL
 
   // API Key না থাকলে এরর দিন
   if (!OPENROUTER_API_KEY) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: "API Key not configured in backend." })
-    };
+    res.status(500).json({ error: "API Key not configured in backend." });
+    return;
   }
 
   // শুধুমাত্র POST রিকোয়েস্ট হ্যান্ডেল করুন
-  if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
+  if (req.method !== 'POST') {
+    res.status(405).json({ body: 'Method Not Allowed' });
+    return;
   }
 
   try {
     // Frontend থেকে পাঠানো ডেটা (messages, model ইত্যাদি) নিন
-    const requestBody = JSON.parse(event.body);
+    // Vercel Functions req.body তে JSON ডেটা অটোমেটিক্যালি পার্স করে দেয়
+    const requestBody = req.body;
 
     // OpenRouter API এর জন্য পেলোড তৈরি করুন
     const openRouterPayload = {
@@ -31,12 +33,12 @@ exports.handler = async function(event, context) {
     };
 
     // OpenRouter API কে কল করুন (এখানেই API Key ব্যবহৃত হবে, যা Public হচ্ছে না)
-    const openRouterRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    const openRouterRes = await fetch("[https://openrouter.ai/api/v1/chat/completions](https://openrouter.ai/api/v1/chat/completions)", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${OPENROUTER_API_KEY}`, // <--- API Key এখানে ব্যবহৃত হচ্ছে
-        "HTTP-Referer": SITE_REFERER, // আপনার সাইটের URL
-        "X-Title": "FL AI Backend", // Backend থেকে কল হচ্ছে বোঝানোর জন্য
+        "HTTP-Referer": process.env.VERCEL_URL || process.env.YOUR_SITE_URL || 'YOUR_SITE_URL', // Vercel এর built-in URL variable ব্যবহার করুন অথবা আপনার Vercel সাইটের URL দিন
+        "X-Title": "FL AI Vercel Backend", // Backend থেকে কল হচ্ছে বোঝানোর জন্য
         "Content-Type": "application/json",
       },
       body: JSON.stringify(openRouterPayload),
@@ -46,23 +48,15 @@ exports.handler = async function(event, context) {
 
     // OpenRouter থেকে যদি এরর আসে, সেটি Frontend এ ফেরত পাঠান
     if (!openRouterRes.ok) {
-         return {
-           statusCode: openRouterRes.status,
-           body: JSON.stringify(openRouterData) // OpenRouter এরর Format
-         };
+         res.status(openRouterRes.status).json(openRouterData); // OpenRouter এরর Format
+         return;
     }
 
     // OpenRouter থেকে সফল উত্তর পেলে সেটি Frontend এ ফেরত পাঠান
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ response: openRouterData.choices?.[0]?.message?.content || "No response from AI." }),
-    };
+    res.status(200).json({ response: openRouterData.choices?.[0]?.message?.content || "No response from AI." });
 
   } catch (error) {
     console.error("Backend Function Error:", error);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: `Backend processing error: ${error.message}` }),
-    };
+    res.status(500).json({ error: `Backend processing error: ${error.message}` });
   }
-};
+}
