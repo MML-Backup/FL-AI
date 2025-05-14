@@ -196,59 +196,67 @@ body {
   }
 
   .input-wrapper {
-    flex-direction: row; /* Keep items in a row on small screens */
-    flex-wrap: wrap; /* Allow items to wrap if needed */
-    align-items: center; /* Align items vertically in the center of the row */
-    padding: 8px 12px; /* Adjust padding */
-    gap: 6px; /* Reduce gap between items */
+    flex-direction: row; /* Keep items in a row */
+    flex-wrap: wrap; /* Allow items to wrap */
+    align-items: center; /* Align items vertically in the center */
+    padding: 6px 10px; /* Further reduce padding */
+    gap: 4px; /* Further reduce gap between items */
     border-radius: 999px; /* Keep pill shape */
   }
 
   .input-wrapper input {
     font-size: 14px;
-    padding: 6px 8px; /* Adjust input padding */
-    min-width: 60px; /* Further reduce min-width to make more space for buttons */
+    padding: 4px 6px; /* Further reduce input padding */
+    min-width: 50px; /* Further reduce min-width */
     flex-grow: 1; /* Allow input to grow */
     flex-basis: auto;
   }
 
     .icon-btn,
     .file-upload label { /* Apply common styles to icon buttons and file upload label */
-      width: 36px; /* Set width to match tablet view */
-      height: 36px; /* Set height to match tablet view */
-      padding: 0; /* Remove padding added in previous mobile attempt */
-      border-radius: 50%; /* Keep pill shape */
-      flex-shrink: 0; /* Prevent shrinking */
-      display: flex; /* Ensure flex properties work */
-      justify-content: center; /* Center content */
-      align-items: center; /* Center content */
+      width: 30px; /* Further reduce button width */
+      height: 30px; /* Further reduce button height */
+      padding: 0;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
 
      .icon-btn svg {
-        width: 18px; /* Keep svg size consistent with tablet view */
-        height: 18px; /* Keep svg size consistent with tablet view */
+        width: 16px; /* Adjust svg size */
+        height: 16px; /* Adjust svg size */
      }
 
 
      /* Model selector specific styles */
       .model-selector {
-         padding: 8px 12px; /* Keep padding consistent with tablet view */
-         font-size: 14px; /* Keep font size consistent with tablet view */
+         padding: 4px 8px; /* Further reduce padding */
+         font-size: 12px; /* Further reduce font size */
          white-space: nowrap;
-         flex-shrink: 0;
-         background-color: #3b3b3b; /* Ensure background color is applied */
-         border-radius: 999px; /* Keep pill shape */
+         flex-shrink: 0; /* Prevent shrinking */
+         background-color: #3b3b3b;
+         border-radius: 999px;
          cursor: pointer;
          color: #fff;
          transition: background-color 0.2s ease;
-         display: flex; /* Use flexbox to align content */
-         align-items: center; /* Vertically center text */
-         justify-content: center; /* Horizontally center text if it doesn't fill space */
+         display: flex;
+         align-items: center;
+         justify-content: center;
+         /* flex-basis: auto; /* Allow flex basis to be determined by content */
+         /* min-width: unset; /* Remove min-width to allow shrinking */
+         /* width: auto; /* Allow width to adjust */
       }
 
 
      .user-message,
      .ai-message {
-         max-width: 90%; /* Allow messages to take more width on small screens */
+         max-width: 95%; /* Allow messages to take more width on very small screens */
      }
+
+    /* Optional: If flex-wrap happens, add some spacing to the wrapped line */
+    /* .input-wrapper > *:last-child {
+        margin-top: 4px; /* Add margin to the top of wrapped items */
+    /* } */
 }
