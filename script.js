@@ -91,7 +91,7 @@ async function search() {
   try {
     // *** CHANGE: Fetch URL now points to the Vercel backend function endpoint ***
     // *** Remove sensitive headers (Authorization, HTTP-Referer, X-Title) ***
-    const res = await fetch("https://fl-ai.vercel.app/", { // <-- Vercel Function Endpoint (automatically available relative URL)
+    const res = await fetch("/api/chat", { // <-- Vercel Function Endpoint (automatically available relative URL)
       method: "POST",
       headers: {
         "Content-Type": "application/json"
