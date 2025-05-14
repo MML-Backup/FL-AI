@@ -44,75 +44,116 @@ function switchModel() {
 
 // Function to handle user input and send to API
 async function search() {
-  const inputElement = document.getElementById("userInput");
-  const input = inputElement.value.trim();
-  const chatBox = document.getElementById("chatBox");
-  if (!input) return;
+  const inputElement = document.getElementById("userInput");
+  const input = inputElement.value.trim();
+  const chatBox = document.getElementById("chatBox");
 
-  // Determine message content based on input type (text or image URL)
-  let messageContent = [];
-  let displayInput = input; // What to display in the chat box
+  // If no text input and no file uploaded, do nothing
+  if (!input && !uploadedFileContent) { // <-- Add check for uploadedFileContent
+    return;
+  }
 
-  // Simple check if input looks like an image URL
-  const imageUrlRegex = /\bhttps?:\/\/\S+\.(?:png|jpg|jpeg|gif|webp)\b/i;
-  const imageMatch = input.match(imageUrlRegex);
+  // Determine message content based on input type (text, image URL, or uploaded file)
+  let messageContent = [];
+  let displayInput = input; // What to display in the chat box
 
-  if (imageMatch) {
-      messageContent.push({
-          "type": "image_url",
-          "image_url": { "url": imageMatch[0] }
-      });
+  // Handle text input (if any)
+  if (input) {
+     // Simple check if input looks like an image URL (existing logic)
+     const imageUrlRegex = /\bhttps?:\/\/\S+\.(?:png|jpg|jpeg|gif|webp)\b/i;
+     const imageMatch = input.match(imageUrlRegex);
 
-      const textPart = input.replace(imageMatch[0], '').trim();
-      if (textPart) {
-           messageContent.push({ "type": "text", "text": textPart });
-           displayInput = textPart + " (Image attached)";
-      } else {
-           const defaultText = "Analyze this image.";
-           messageContent.push({ "type": "text", "text": defaultText });
-           displayInput = `Image: ${imageMatch[0]} (Instruction: ${defaultText})`;
-      }
+     if (imageMatch) {
+        messageContent.push({
+           "type": "image_url",
+           "image_url": { "url": imageMatch[0] }
+        });
 
-  } else {
-      messageContent.push({ "type": "text", "text": input });
-       displayInput = input;
-  }
+        const textPart = input.replace(imageMatch[0], '').trim();
+        if (textPart) {
+           messageContent.push({ "type": "text", "text": textPart });
+           displayInput = textPart + " (Image URL attached)"; // Clarify display text
+        } else {
+           const defaultText = "Analyze this image.";
+           messageContent.push({ "type": "text", "text": defaultText });
+           displayInput = `Image URL: ${imageMatch[0]} (Instruction: ${defaultText})`; // Clarify display text
+        }
+     } else {
+        // Standard text input
+        messageContent.push({ "type": "text", "text": input });
+        displayInput = input;
+     }
+  }
 
-  // Add user message to chat history (displaying the formatted input)
-  chatHistory.push({ role: "user", content: displayInput });
-  updateChatHistory();
+  // --- Add logic to include uploaded file content ---
+  if (uploadedFileContent) {
+      // If there is uploaded file content (from uploadFile function)
+      // Add it to the messageContent array.
+      // uploadedFileContent is already in the correct { type: "...", ... } format
+      messageContent.push(uploadedFileContent);
 
-  // Clear input field
-  inputElement.value = "";
+      // Update displayInput to show that a file is included, if there was no text input
+      if (!input) {
+           if (uploadedFileContent.type === 'text') {
+               const snippet = uploadedFileContent.text.substring(0, 50) + (uploadedFileContent.text.length > 50 ? '...' : '');
+               displayInput = `Uploaded text file: "${snippet}"`;
+           } else if (uploadedFileContent.type === 'image_url') {
+               displayInput = `Uploaded image file.`;
+           }
+      } else {
+          // If there was text input, just indicate a file was also included
+          if (uploadedFileContent.type === 'text') {
+               displayInput += " (Text file included)";
+           } else if (uploadedFileContent.type === 'image_url') {
+               displayInput += " (Image file included)";
+           }
+      }
+  }
+  // ----------------------------------------------------
 
-  // Show loading indicator
-  showLoadingIndicator();
 
-  try {
-    // *** CHANGE: Fetch URL now points to the Vercel backend function endpoint ***
-    // *** Remove sensitive headers (Authorization, HTTP-Referer, X-Title) ***
-    const res = await fetch("/api/chat", { // <-- Vercel Function Endpoint (automatically available relative URL)
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-        // API Key, Referer, X-Title are handled securely by the backend function
-      },
-      body: JSON.stringify({
-        model: CURRENT_MODEL, // Send the selected model ID to the backend
-        // Send recent history + the current message content to the backend
-        messages: [
-           // Map chatHistory to the required API message format (role and content)
-           // Ensure multimodal content is sent correctly
-             ...chatHistory.slice(-10).map(msg => ({
-                 role: msg.role,
-                 // If content is a string, convert it to the array format [{ type: 'text', text: '...' }]
-                 // If content is already an array (from multimodal input), send it as is
-                 content: typeof msg.content === 'string' ? [{ type: 'text', text: msg.content }] : msg.content
-             })),
-           { role: "user", content: messageContent } // Add the current multimodal user message content
-        ]
-      })
-    });
+  // Add user message to chat history (displaying the formatted input)
+  chatHistory.push({ role: "user", content: displayInput }); // Use displayInput
+  updateChatHistory();
+
+  // Clear input field and uploaded file content
+  inputElement.value = "";
+  uploadedFileContent = null; // <-- Clear uploaded file content after sending
+
+  // Show loading indicator
+  showLoadingIndicator();
+
+  try {
+    // *** CHANGE: Fetch URL now points to the Vercel backend function endpoint ***
+    // *** Remove sensitive headers (Authorization, HTTP-Referer, X-Title) ***
+    const res = await fetch("/api/chat", { // <-- Vercel Function Endpoint (automatically available relative URL)
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+        // API Key, Referer, X-Title are handled securely by the backend function
+      },
+      body: JSON.stringify({
+        model: CURRENT_MODEL, // Send the selected model ID to the backend
+        // Send recent history + the current message content to the backend
+        messages: [
+           // Map chatHistory to the required API message format (role and content)
+           // Ensure multimodal content is sent correctly
+           // Create content array from string content if needed for history
+           ...chatHistory.slice(-10).map(msg => ({
+              role: msg.role,
+              // If content is a string, convert it to the array format [{ type: 'text', text: '...' }]
+              // If content is already an array (from multimodal input), send it as is
+              // NOTE: For simplicity, chatHistory stores display strings.
+              // We need to reconstruct the API format for history if needed.
+              // For now, sending history as simple text parts.
+              // Complex history handling for multimodal requires more changes.
+              // Let's start by sending the *current* multimodal message correctly.
+              content: [{ type: 'text', text: typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content) }] // Basic history handling
+           })),
+           { role: "user", content: messageContent } // Add the current multimodal user message content
+        ]
+      })
+    });
 
     // *** CHANGE: Handle response from our backend function ***
     // Our backend function returns a JSON object like { response: "AI message" } or { error: "..." }
@@ -124,20 +165,20 @@ async function search() {
         throw new Error(`Backend responded with status ${res.status}: ${errorMessage}`);
     }
 
-    // Get the AI response from the backend's response object
-    const aiResponse = data.response || "No response received from backend.";
+    // Get the AI response from the backend's response object
+    const aiResponse = data.response || "No response received from AI.";
 
-    // Add AI response to chat history
-    chatHistory.push({ role: "assistant", content: aiResponse });
-    updateChatHistory();
-  } catch (err) {
-    console.error("Backend Function Call Error:", err); // Log the error for debugging
-    chatHistory.push({ role: "assistant", content: `Error: Failed to get a response from backend. ${err.message}` }); // More user-friendly error
-    updateChatHistory();
-  } finally {
-    // Hide loading indicator
-    hideLoadingIndicator();
-  }
+    // Add AI response to chat history
+    chatHistory.push({ role: "assistant", content: aiResponse });
+    updateChatHistory();
+  } catch (err) {
+    console.error("Backend Function Call Error:", err); // Log the error for debugging
+    chatHistory.push({ role: "assistant", content: `Error: Failed to get a response from backend. ${err.message}` }); // More user-friendly error
+    updateChatHistory();
+  } finally {
+    // Hide loading indicator
+    hideLoadingIndicator();
+  }
 }
 
 // Function to update chat history display (unchanged - displays simple string content)
