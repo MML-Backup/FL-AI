@@ -13,16 +13,18 @@ body {
   justify-content: center;
   align-items: center;
   padding: 20px;
-  overflow-y: auto; /* Scroll if content overflows viewport height */
+  overflow: hidden; /* prevent scroll unless really needed */
 }
 
 .container {
   text-align: center;
   max-width: 700px;
   width: 100%;
-  display: flex; /* Use flexbox for main container layout */
-  flex-direction: column; /* Stack children vertically */
-  min-height: 100%; /* Ensure container takes at least full height */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;  /* vertically center content inside container */
+  align-items: center;      /* horizontally center inside container */
+  flex-grow: 1;
 }
 
 .title {
