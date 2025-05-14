@@ -207,20 +207,17 @@ body {
   .input-wrapper input {
     font-size: 14px;
     padding: 6px 8px; /* Adjust input padding */
-    /* min-width adjusted or removed depending on desired behavior */
-    min-width: 80px; /* Allow input to shrink more, but have a minimum width */
+    min-width: 60px; /* Further reduce min-width to make more space for buttons */
     flex-grow: 1; /* Allow input to grow */
-    flex-basis: auto; /* Allow flex basis to be determined by content/min-width */
-
+    flex-basis: auto;
   }
 
     .icon-btn,
-    .model-selector,
-    .file-upload label {
-      width: 30px; /* Reduced width for icons */
-      height: 30px; /* Reduced height for icons */
-      padding: 0; /* Remove padding from buttons */
-      border-radius: 50%; /* Keep pill shape for icons */
+    .file-upload label { /* Apply common styles to icon buttons and file upload label */
+      width: 36px; /* Set width to match tablet view */
+      height: 36px; /* Set height to match tablet view */
+      padding: 0; /* Remove padding added in previous mobile attempt */
+      border-radius: 50%; /* Keep pill shape */
       flex-shrink: 0; /* Prevent shrinking */
       display: flex; /* Ensure flex properties work */
       justify-content: center; /* Center content */
@@ -228,17 +225,27 @@ body {
     }
 
      .icon-btn svg {
-        width: 16px; /* Smaller svg size */
-        height: 16px; /* Smaller svg size */
+        width: 18px; /* Keep svg size consistent with tablet view */
+        height: 18px; /* Keep svg size consistent with tablet view */
      }
 
 
-     /* Adjustments for model selector specifically if needed */
+     /* Model selector specific styles */
       .model-selector {
-         padding: 4px 8px; /* Adjust padding to fit text */
-         font-size: 12px; /* Smaller font size */
-         /* width, height, flex-shrink inherited from common styles */
+         padding: 8px 12px; /* Keep padding consistent with tablet view */
+         font-size: 14px; /* Keep font size consistent with tablet view */
+         white-space: nowrap;
+         flex-shrink: 0;
+         background-color: #3b3b3b; /* Ensure background color is applied */
+         border-radius: 999px; /* Keep pill shape */
+         cursor: pointer;
+         color: #fff;
+         transition: background-color 0.2s ease;
+         display: flex; /* Use flexbox to align content */
+         align-items: center; /* Vertically center text */
+         justify-content: center; /* Horizontally center text if it doesn't fill space */
       }
+
 
      .user-message,
      .ai-message {
