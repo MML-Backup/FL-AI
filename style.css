@@ -22,9 +22,9 @@ body {
   width: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: center;  /* vertically center content inside container */
-  align-items: center;      /* horizontally center inside container */
-  flex-grow: 1;
+  justify-content: center; /* vertically center content inside container */
+  align-items: center;     /* horizontally center inside container */
+  flex-grow: 1; /* Allow container to take up available space in body */
 }
 
 .title {
@@ -45,21 +45,22 @@ body {
   border-radius: 16px;
   padding: 20px;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
-  flex-grow: 1; /* Allow chat-box to take up available space */
+  flex-grow: 1; /* Allow chat-box to take up available space in container */
   overflow-y: auto; /* Add scrollbar when content overflows */
   margin-bottom: 15px;
   display: flex; /* Use flexbox for chat messages */
   flex-direction: column; /* Stack messages vertically */
-  max-height: 400px; /* Keep a max height for chat box */
+  /* max-height remove করা হলো */
+  /* max-height: 400px; Keep a max height for chat box */
 }
 
 /* Adjust max-height for chat-box on larger screens if needed, or rely on flex-grow */
 @media (min-width: 601px) {
     .chat-box {
-        max-height: 500px; /* Example: slightly more height on larger screens */
+        /* max-height remove করা হলো */
+        /* max-height: 500px; Example: slightly more height on larger screens */
     }
 }
-
 
 .input-wrapper {
   display: flex;
@@ -194,7 +195,8 @@ body {
 
   .chat-box {
       padding: 15px; /* Slightly less padding for chat box */
-      max-height: 300px; /* Adjust max height for mobile chat box */
+      /* max-height remove করা হলো */
+      /* max-height: 300px; Adjust max height for mobile chat box */
   }
 
   .input-wrapper {
@@ -226,36 +228,36 @@ body {
       align-items: center;
     }
 
-     .icon-btn svg {
+      .icon-btn svg {
         width: 16px; /* Adjust svg size */
         height: 16px; /* Adjust svg size */
-     }
-
-
-     /* Model selector specific styles */
-      .model-selector {
-         padding: 4px 8px; /* Further reduce padding */
-         font-size: 12px; /* Further reduce font size */
-         white-space: nowrap;
-         flex-shrink: 0; /* Prevent shrinking */
-         background-color: #3b3b3b;
-         border-radius: 999px;
-         cursor: pointer;
-         color: #fff;
-         transition: background-color 0.2s ease;
-         display: flex;
-         align-items: center;
-         justify-content: center;
-         /* flex-basis: auto; /* Allow flex basis to be determined by content */
-         /* min-width: unset; /* Remove min-width to allow shrinking */
-         /* width: auto; /* Allow width to adjust */
       }
 
 
-     .user-message,
-     .ai-message {
-         max-width: 95%; /* Allow messages to take more width on very small screens */
-     }
+      /* Model selector specific styles */
+       .model-selector {
+          padding: 4px 8px; /* Further reduce padding */
+          font-size: 12px; /* Further reduce font size */
+          white-space: nowrap;
+          flex-shrink: 0; /* Prevent shrinking */
+          background-color: #3b3b3b;
+          border-radius: 999px;
+          cursor: pointer;
+          color: #fff;
+          transition: background-color 0.2s ease;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          /* flex-basis: auto; /* Allow flex basis to be determined by content */
+          /* min-width: unset; /* Remove min-width to allow shrinking */
+          /* width: auto; /* Allow width to adjust */
+       }
+
+
+      .user-message,
+      .ai-message {
+          max-width: 95%; /* Allow messages to take more width on very small screens */
+      }
 
     /* Optional: If flex-wrap happens, add some spacing to the wrapped line */
     /* .input-wrapper > *:last-child {
