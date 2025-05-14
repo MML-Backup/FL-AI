@@ -13,12 +13,16 @@ body {
   justify-content: center;
   align-items: center;
   padding: 20px;
+  overflow-y: auto; /* Scroll if content overflows viewport height */
 }
 
 .container {
   text-align: center;
   max-width: 700px;
   width: 100%;
+  display: flex; /* Use flexbox for main container layout */
+  flex-direction: column; /* Stack children vertically */
+  min-height: 100%; /* Ensure container takes at least full height */
 }
 
 .title {
@@ -39,10 +43,21 @@ body {
   border-radius: 16px;
   padding: 20px;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
-  max-height: 400px;
-  overflow-y: auto;
-  margin-bottom: 15px; /* ইনপুট এরিয়া থেকে একটু দূরত্ব */
+  flex-grow: 1; /* Allow chat-box to take up available space */
+  overflow-y: auto; /* Add scrollbar when content overflows */
+  margin-bottom: 15px;
+  display: flex; /* Use flexbox for chat messages */
+  flex-direction: column; /* Stack messages vertically */
+  max-height: 400px; /* Keep a max height for chat box */
 }
+
+/* Adjust max-height for chat-box on larger screens if needed, or rely on flex-grow */
+@media (min-width: 601px) {
+    .chat-box {
+        max-height: 500px; /* Example: slightly more height on larger screens */
+    }
+}
+
 
 .input-wrapper {
   display: flex;
@@ -51,17 +66,18 @@ body {
   border-radius: 999px;
   padding: 12px 18px;
   gap: 12px;
-  flex-wrap: wrap; /* ছোট স্ক্রিনে এলিমেন্টগুলো নিচে নিচে আসবে */
+  flex-shrink: 0; /* Prevent input-wrapper from shrinking */
+  width: 100%; /* Ensure input wrapper takes full width */
 }
 
 .input-wrapper input {
-  flex: 1;
+  flex: 1; /* Allow input to grow and take available space */
   background: transparent;
   border: none;
   color: #fff;
   font-size: 16px;
   outline: none;
-  min-width: 150px; /* ছোট স্ক্রিনে ইনপুট ফিল্ড যাতে খুব ছোট না হয়ে যায় */
+  min-width: 150px; /* Minimum width for usability */
 }
 
 .icon-btn {
@@ -74,7 +90,7 @@ body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  flex-shrink: 0; /* ছোট স্ক্রিনে বাটনগুলো যাতে না ছোট হয়ে যায় */
+  flex-shrink: 0; /* Prevent icons from shrinking */
 }
 
 .icon-btn:hover {
@@ -99,18 +115,13 @@ body {
   cursor: pointer;
   font-size: 14px;
   color: #fff;
-  white-space: nowrap; /* টেক্সট এক লাইনে থাকবে */
-  flex-shrink: 0; /* ছোট স্ক্রিনে এটিও যাতে না ছোট হয়ে যায় */
-  transition: background-color 0.2s ease; /* হোভার ইফেক্ট */
+  white-space: nowrap;
+  flex-shrink: 0; /* Prevent selector from shrinking */
+  transition: background-color 0.2s ease;
 }
 
 .model-selector:hover {
   background-color: #555;
-}
-
-
-.response {
-  margin-top: 20px; /* এই স্টাইলটি সম্ভবত ব্যবহার হচ্ছে না, চ্যাট বক্সের মধ্যেই মেসেজ দেখাচ্ছে */
 }
 
 .user-message {
@@ -120,7 +131,9 @@ body {
   border-radius: 8px;
   margin-bottom: 10px;
   text-align: right;
-  word-wrap: break-word; /* লম্বা শব্দ ভাঙতে */
+  word-wrap: break-word;
+  align-self: flex-end; /* Align user messages to the right */
+  max-width: 80%; /* Limit width */
 }
 
 .ai-message {
@@ -130,8 +143,11 @@ body {
   border-radius: 8px;
   margin-bottom: 10px;
   text-align: left;
-  word-wrap: break-word; /* লম্বা শব্দ ভাঙতে */
+  word-wrap: break-word;
+  align-self: flex-start; /* Align AI messages to the left */
+  max-width: 80%; /* Limit width */
 }
+
 
 .loading-spinner {
   border: 4px solid #f3f3f3;
@@ -142,6 +158,7 @@ body {
   animation: spin 1s linear infinite;
   display: inline-block;
   margin-right: 8px;
+  vertical-align: middle; /* Align spinner with text */
 }
 
 @keyframes spin {
@@ -153,46 +170,84 @@ body {
   }
 }
 
-/* --- মোবাইল স্ক্রিনের জন্য মিডিয়া ক্যোয়ারি --- */
+/* --- মোবাইল স্ক্রিনের জন্য মিডিয়া ক্যোয়ারি --- */
 /* যখন স্ক্রিনের সর্বোচ্চ প্রস্থ 600px বা তার কম হবে */
 @media (max-width: 600px) {
+  body {
+      padding: 10px; /* Reduce padding on small screens */
+  }
+
   .container {
-    padding: 10px; /* ছোট স্ক্রিনের জন্য প্যাডিং কমানো হলো */
+      padding: 0; /* Remove container padding as body has padding */
   }
 
   .title {
-    font-size: 24px; /* টাইটেলের ফন্ট সাইজ ছোট করা হলো */
+    font-size: 24px; /* Smaller font size for title */
   }
 
   .subtitle {
-    font-size: 14px; /* সাবটাইটেলের ফন্ট সাইজ ছোট করা হলো */
+    font-size: 14px; /* Smaller font size for subtitle */
+  }
+
+  .chat-box {
+      padding: 15px; /* Slightly less padding for chat box */
+      max-height: 300px; /* Adjust max height for mobile chat box */
   }
 
   .input-wrapper {
-    flex-direction: column; /* ছোট স্ক্রিনে এলিমেন্টগুলো উপরে নিচে আসবে */
-    align-items: stretch; /* এলিমেন্টগুলো পুরো প্রস্থ জুড়ে দেখাবে */
+    flex-direction: column; /* Stack items vertically */
+    align-items: stretch; /* Stretch items to fill width */
     padding: 10px;
     gap: 8px;
+    border-radius: 16px; /* Use rounded corners instead of pill shape */
   }
 
   .input-wrapper input {
     font-size: 14px;
-    padding: 8px;
-    min-width: unset; /* ছোট স্ক্রিনে min-width এর দরকার নেই */
+    padding: 10px; /* Add padding inside input field */
+    min-width: unset;
+    order: 1; /* Place input field first in the column */
   }
 
-   .icon-btn,
-   .model-selector {
-      width: 100%; /* ছোট স্ক্রিনে পুরো প্রস্থ নেবে */
-      text-align: center; /* লেখা বা আইকন সেন্টারে আসবে */
-      justify-content: center; /* ফ্লেক্স এলিমেন্ট সেন্টারে আনতে */
-      padding: 10px; /* প্যাডিং যোগ করা হলো ক্লিক করতে সুবিধা হবে */
-   }
-
-    .icon-btn svg {
-        margin: 0 auto; /* svg কে সেন্টারে আনতে */
+    .icon-btn,
+    .model-selector {
+      width: 100%; /* Take full width */
+      text-align: center;
+      justify-content: center;
+      padding: 10px; /* Add padding for easier tapping */
+      border-radius: 8px; /* Use rounded corners instead of pill shape */
+      order: 2; /* Place icons and model selector after input */
     }
-     .file-upload label {
-        width: 100%; /* Label যাতে পুরো প্রস্থ নেয় */
+
+     .icon-btn svg {
+        margin: 0 auto; /* Center svg */
+     }
+
+      .file-upload label {
+        width: 100%; /* Label takes full width */
+        display: flex; /* Use flexbox for centering icon */
+        justify-content: center; /* Center icon horizontally */
+        align-items: center; /* Center icon vertically */
+        padding: 10px; /* Add padding for easier tapping */
+        border-radius: 8px; /* Match button styling */
+         order: 2; /* Place upload button with other controls */
+      }
+
+      /* Adjust specific icon button order if needed */
+       #voiceIcon { order: 2; }
+       .file-upload { order: 2; }
+       #modelSelector { order: 2; }
+       .icon-btn[onclick="search()"] { order: 2; }
+
+     /* Add some margin between stacked buttons if needed */
+     .input-wrapper .icon-btn:not(:last-child),
+     .input-wrapper .model-selector:not(:last-child),
+     .input-wrapper .file-upload:not(:last-child) {
+        margin-bottom: 0px; /* Adjust spacing between stacked items */
+     }
+
+     .user-message,
+     .ai-message {
+         max-width: 90%; /* Allow messages to take more width on small screens */
      }
 }
