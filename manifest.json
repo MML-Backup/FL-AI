@@ -1,0 +1,8 @@
+{
+  "name": "FL AI App",
+  "short_name": "FL AI",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0d0d0d",
+  "theme_color": "#0d6efd"
+}
