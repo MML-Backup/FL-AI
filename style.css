@@ -68,6 +68,7 @@ body {
   gap: 12px;
   flex-shrink: 0; /* Prevent input-wrapper from shrinking */
   width: 100%; /* Ensure input wrapper takes full width */
+  flex-wrap: wrap; /* Allow items to wrap to the next line if space is insufficient */
 }
 
 .input-wrapper input {
@@ -195,56 +196,49 @@ body {
   }
 
   .input-wrapper {
-    flex-direction: column; /* Stack items vertically */
-    align-items: stretch; /* Stretch items to fill width */
-    padding: 10px;
-    gap: 8px;
-    border-radius: 16px; /* Use rounded corners instead of pill shape */
+    flex-direction: row; /* Keep items in a row on small screens */
+    flex-wrap: wrap; /* Allow items to wrap if needed */
+    align-items: center; /* Align items vertically in the center of the row */
+    padding: 8px 12px; /* Adjust padding */
+    gap: 6px; /* Reduce gap between items */
+    border-radius: 999px; /* Keep pill shape */
   }
 
   .input-wrapper input {
     font-size: 14px;
-    padding: 10px; /* Add padding inside input field */
-    min-width: unset;
-    order: 1; /* Place input field first in the column */
+    padding: 6px 8px; /* Adjust input padding */
+    /* min-width adjusted or removed depending on desired behavior */
+    min-width: 80px; /* Allow input to shrink more, but have a minimum width */
+    flex-grow: 1; /* Allow input to grow */
+    flex-basis: auto; /* Allow flex basis to be determined by content/min-width */
+
   }
 
     .icon-btn,
-    .model-selector {
-      width: 100%; /* Take full width */
-      text-align: center;
-      justify-content: center;
-      padding: 10px; /* Add padding for easier tapping */
-      border-radius: 8px; /* Use rounded corners instead of pill shape */
-      order: 2; /* Place icons and model selector after input */
+    .model-selector,
+    .file-upload label {
+      width: 30px; /* Reduced width for icons */
+      height: 30px; /* Reduced height for icons */
+      padding: 0; /* Remove padding from buttons */
+      border-radius: 50%; /* Keep pill shape for icons */
+      flex-shrink: 0; /* Prevent shrinking */
+      display: flex; /* Ensure flex properties work */
+      justify-content: center; /* Center content */
+      align-items: center; /* Center content */
     }
 
      .icon-btn svg {
-        margin: 0 auto; /* Center svg */
+        width: 16px; /* Smaller svg size */
+        height: 16px; /* Smaller svg size */
      }
 
-      .file-upload label {
-        width: 100%; /* Label takes full width */
-        display: flex; /* Use flexbox for centering icon */
-        justify-content: center; /* Center icon horizontally */
-        align-items: center; /* Center icon vertically */
-        padding: 10px; /* Add padding for easier tapping */
-        border-radius: 8px; /* Match button styling */
-         order: 2; /* Place upload button with other controls */
+
+     /* Adjustments for model selector specifically if needed */
+      .model-selector {
+         padding: 4px 8px; /* Adjust padding to fit text */
+         font-size: 12px; /* Smaller font size */
+         /* width, height, flex-shrink inherited from common styles */
       }
-
-      /* Adjust specific icon button order if needed */
-       #voiceIcon { order: 2; }
-       .file-upload { order: 2; }
-       #modelSelector { order: 2; }
-       .icon-btn[onclick="search()"] { order: 2; }
-
-     /* Add some margin between stacked buttons if needed */
-     .input-wrapper .icon-btn:not(:last-child),
-     .input-wrapper .model-selector:not(:last-child),
-     .input-wrapper .file-upload:not(:last-child) {
-        margin-bottom: 0px; /* Adjust spacing between stacked items */
-     }
 
      .user-message,
      .ai-message {
