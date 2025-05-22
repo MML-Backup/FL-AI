@@ -5,9 +5,16 @@
 // These are now securely handled in backend via Vercel Environment Variables
 // --- END ---
 
+// Ensure pdfjsLib is available globally (from CDN in index.html)
+if (typeof pdfjsLib === 'undefined') {
+  console.error("pdf.js library not loaded. PDF parsing will not work.");
+} else {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+}
+
 const AVAILABLE_MODELS = [
-  { id: "deepseek/deepseek-chat:free", name: "DeepSeek Chat Free", shortName: "DS" },
   { id: "google/gemini-2.5-flash-preview-04-17", name: "Gemini 2.5 Flash", shortName: "GF" },
+  { id: "deepseek/deepseek-chat:free", name: "DeepSeek Chat Free", shortName: "DS" },
   { id: "microsoft/phi-4-reasoning-plus:free", name: "Phi-4 Reasoning Plus", shortName: "P4+" },
   { id: "microsoft/phi-4-reasoning:free", name: "Phi-4 Reasoning", shortName: "P4" },
   { id: "meta-llama/llama-4-scout:free", name: "Llama 4 Scout", shortName: "L4S" },
@@ -59,41 +66,58 @@ async function search() {
       initialMessageDiv.remove();
   }
 
-  let messageContent = [];
-  let displayInput = input;
-  const imageUrlRegex = /\bhttps?:\/\/\S+\.(?:png|jpg|jpeg|gif|webp)\b/i;
-  const imageMatch = input.match(imageUrlRegex);
+  let messageContent = []; // This will be the actual content sent to the backend
+  let displayInput = input; // This is what is displayed in the chat history for the user
 
-  // Check if the input starts with a file instruction (from uploadFile)
-  const isFileUploadInstruction = input.startsWith("Image selected:") || input.startsWith("Text file selected:") || input.startsWith("PDF selected:") || input.startsWith("Video selected:");
+  // Handle file data if present from uploadFile function
+  const fileData = inputElement.dataset.fileData; // Custom attribute to store file data
+  const fileType = inputElement.dataset.fileType;
+  const fileName = inputElement.dataset.fileName;
 
-  if (imageMatch) {
-    // If a direct image URL is pasted in input
-    messageContent.push({
-      "type": "image_url",
-      "image_url": { "url": imageMatch[0] }
-    });
-
-    const textPart = input.replace(imageMatch[0], '').trim();
-    if (textPart) {
-      messageContent.push({ "type": "text", "text": textPart });
-      displayInput = textPart + " (Image attached)";
-    } else {
-      const defaultText = "Analyze this image.";
-      messageContent.push({ "type": "text", "text": defaultText });
-      displayInput = `Image: ${imageMatch[0]} (Instruction: ${defaultText})`;
+  if (fileData && fileType) {
+    if (fileType.startsWith('image/')) {
+        messageContent.push({
+            "type": "image_url",
+            "image_url": { "url": fileData } // Base64 image data
+        });
+        displayInput = `Image (${fileName}) selected: ${input}`; // Display original user input with file info
+    } else if (fileType === 'application/pdf' || fileType.startsWith('text/')) {
+        // For PDF/Text, fileData contains extracted text
+        messageContent.push({ "type": "text", "text": `Content from ${fileName}: ${fileData}\n\nUser's question: ${input}` });
+        displayInput = `File (${fileName}) content processed. Question: ${input}`;
+    } else if (fileType.startsWith('video/')) {
+        // For video, we can only send the filename and user's instruction
+        messageContent.push({ "type": "text", "text": `User uploaded a video named '${fileName}'. Their question is: ${input}` });
+        displayInput = `Video (${fileName}) uploaded. Question: ${input}`;
     }
-  } else if (isFileUploadInstruction) {
-    // If a file was uploaded and instruction set by uploadFile
-    // For now, we'll just pass the instruction as text.
-    // Full file content handling needs backend changes.
-    messageContent.push({ "type": "text", "text": input });
-    displayInput = input;
-  }
-  else {
-    // Regular text input
-    messageContent.push({ "type": "text", "text": input });
-    displayInput = input;
+    // Clear dataset attributes after use
+    delete inputElement.dataset.fileData;
+    delete inputElement.dataset.fileType;
+    delete inputElement.dataset.fileName;
+  } else {
+    // For regular text input or image URLs pasted directly in input
+    const imageUrlRegex = /\bhttps?:\/\/\S+\.(?:png|jpg|jpeg|gif|webp)\b/i;
+    const imageMatch = input.match(imageUrlRegex);
+
+    if (imageMatch) {
+      messageContent.push({
+        "type": "image_url",
+        "image_url": { "url": imageMatch[0] }
+      });
+      const textPart = input.replace(imageMatch[0], '').trim();
+      if (textPart) {
+        messageContent.push({ "type": "text", "text": textPart });
+        displayInput = textPart + " (Image URL attached)";
+      } else {
+        const defaultText = "Analyze this image.";
+        messageContent.push({ "type": "text", "text": defaultText });
+        displayInput = `Image URL: ${imageMatch[0]} (Instruction: ${defaultText})`;
+      }
+    } else {
+      // Regular text input
+      messageContent.push({ "type": "text", "text": input });
+      displayInput = input;
+    }
   }
 
   chatHistory.push({ role: "user", content: displayInput });
@@ -103,6 +127,12 @@ async function search() {
   showLoadingIndicator();
 
   try {
+    const messagesToSend = chatHistory.slice(-10).map(msg => ({ // Send last 10 messages for context
+        role: msg.role,
+        content: typeof msg.content === 'string' ? [{ type: 'text', text: msg.content }] : msg.content
+    }));
+    messagesToSend.push({ role: "user", content: messageContent }); // Add the current user message
+
     const res = await fetch("/api/chat", {
       method: "POST",
       headers: {
@@ -110,14 +140,7 @@ async function search() {
       },
       body: JSON.stringify({
         model: CURRENT_MODEL,
-        messages: [
-          ...chatHistory.slice(-10).map(msg => ({ // Send last 10 messages for context
-            role: msg.role,
-            // Ensure content is an array for multimodal support in backend
-            content: typeof msg.content === 'string' ? [{ type: 'text', text: msg.content }] : msg.content
-          })),
-          { role: "user", content: messageContent }
-        ]
+        messages: messagesToSend
       })
     });
 
@@ -155,16 +178,27 @@ function updateChatHistory() {
     const contentDiv = document.createElement("div");
     contentDiv.className = "message-content";
 
-    // Handle HTML content (like generated images) vs plain text
-    if (typeof message.content === 'string' && message.content.includes('<img src=')) { // Simple check for image HTML
-        contentDiv.innerHTML = message.content;
+    let renderedContent = '';
+    if (typeof message.content === 'string') {
+        // Handle HTML content like generated images (simple check)
+        if (message.content.includes('<img src=')) {
+            renderedContent = message.content;
+        } else {
+            renderedContent = marked.parse(message.content);
+        }
     } else if (Array.isArray(message.content)) {
-      // For multi-part messages, display text or a generic message
-      const textPart = message.content.find(part => part.type === 'text');
-      contentDiv.innerHTML = marked.parse(textPart ? textPart.text : "User sent an image/file."); // Use Marked for Markdown
-    } else {
-      contentDiv.innerHTML = marked.parse(message.content); // Use Marked for Markdown
+        // Handle multimodal content for display
+        message.content.forEach(part => {
+            if (part.type === 'text') {
+                renderedContent += marked.parse(part.text);
+            } else if (part.type === 'image_url') {
+                renderedContent += `<img src="${part.image_url.url}" style="max-width:100%; border-radius:8px; margin-top:10px;" alt="Attached Image">`;
+            }
+            // Add more types as needed for display
+        });
     }
+
+    contentDiv.innerHTML = renderedContent;
     
     messageDiv.appendChild(avatarDiv);
     messageDiv.appendChild(contentDiv);
@@ -197,24 +231,30 @@ function hideLoadingIndicator() {
 }
 
 // File upload handling and preview
-function uploadFile() {
+async function uploadFile() {
   const fileInput = document.getElementById("fileUpload");
   const file = fileInput.files[0];
   if (!file) return;
 
+  const inputElement = document.getElementById("userInput");
   const chatBox = document.getElementById("chatBox");
   const previewDiv = document.createElement("div");
   previewDiv.className = "file-preview ai-message"; // Style like an AI message for consistency
-  chatBox.appendChild(previewDiv); // Add to chatBox for visual feedback
+  chatBox.appendChild(previewDiv);
 
   const avatarDiv = document.createElement("div");
   avatarDiv.className = "message-avatar";
-  avatarDiv.textContent = "AI"; // AI's response to file upload
+  avatarDiv.textContent = "AI";
 
   const contentDiv = document.createElement("div");
   contentDiv.className = "message-content";
   previewDiv.appendChild(avatarDiv);
   previewDiv.appendChild(contentDiv);
+
+  // Store file data in a dataset attribute of the input element for search() to pick up
+  inputElement.dataset.fileType = file.type;
+  inputElement.dataset.fileName = file.name;
+
 
   if (file.type.startsWith('image/')) {
     const reader = new FileReader();
@@ -222,31 +262,63 @@ function uploadFile() {
       const img = document.createElement("img");
       img.src = event.target.result;
       img.alt = "Uploaded image preview";
-      contentDiv.innerHTML = `<p>Image ready: ${file.name}</p>`;
+      contentDiv.innerHTML = `<p>Image ready: <strong>${file.name}</strong></p>`;
       contentDiv.appendChild(img);
-      document.getElementById("userInput").value = `Image selected: ${file.name}. Please enter your question or instruction regarding the image.`;
+      inputElement.value = `Describe or ask a question about this image.`;
+      inputElement.dataset.fileData = event.target.result; // Base64 data for image
+      adjustTextareaHeight(inputElement);
     };
     reader.readAsDataURL(file);
   } else if (file.type === 'application/pdf') {
-    contentDiv.innerHTML = `<p>PDF selected: ${file.name} <div data-lucide="file-text" style="display:inline-block; vertical-align:middle; width:20px; height:20px; stroke:#fff;"></div></p>`;
-    document.getElementById("userInput").value = `PDF selected: ${file.name}. Please ask questions about its content.`;
-    lucide.createIcons();
+    contentDiv.innerHTML = `<p>Processing PDF: <strong>${file.name}</strong> <div data-lucide="file-text" style="display:inline-block; vertical-align:middle; width:20px; height:20px; stroke:#fff;"></div></p>`;
+    lucide.createIcons(); // Re-render lucide icons
+
+    try {
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+            const typedarray = new Uint8Array(event.target.result);
+            const pdf = await pdfjsLib.getDocument(typedarray).promise;
+            let fullText = '';
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const textContent = await page.getTextContent();
+                fullText += textContent.items.map(item => item.str).join(' ') + '\n';
+            }
+            contentDiv.innerHTML = `<p>PDF content extracted from: <strong>${file.name}</strong></p><textarea readonly>${fullText.substring(0, 500)}...</textarea><p>Enter your question about the PDF content below.</p>`;
+            inputElement.value = `Ask your question about the content of "${file.name}".`;
+            inputElement.dataset.fileData = fullText; // Store extracted text
+            adjustTextareaHeight(inputElement);
+        };
+        reader.readAsArrayBuffer(file);
+    } catch (error) {
+        console.error("Error parsing PDF:", error);
+        contentDiv.innerHTML = `<p>Failed to read PDF: <strong>${file.name}</strong>. Error: ${error.message}</p>`;
+        inputElement.value = `Error reading PDF: ${file.name}. Please try again.`;
+        delete inputElement.dataset.fileData; // Clear data if error
+    }
   } else if (file.type.startsWith('text/')) {
     const reader = new FileReader();
     reader.onload = (event) => {
       const content = event.target.result;
-      contentDiv.innerHTML = `<p>Text file selected: ${file.name}</p><textarea readonly>${content.substring(0, 300)}...</textarea>`;
-      document.getElementById("userInput").value = `Text file selected: ${file.name}. Content snippet ready. Ask your question.`;
+      contentDiv.innerHTML = `<p>Text file loaded: <strong>${file.name}</strong></p><textarea readonly>${content.substring(0, 500)}...</textarea><p>Enter your question about this text.</p>`;
+      inputElement.value = `Ask your question about the content of "${file.name}".`;
+      inputElement.dataset.fileData = content; // Store full text
+      adjustTextareaHeight(inputElement);
     };
     reader.readAsText(file);
   } else if (file.type.startsWith('video/')) {
-    contentDiv.innerHTML = `<p>Video selected: ${file.name} <div data-lucide="video" style="display:inline-block; vertical-align:middle; width:20px; height:20px; stroke:#fff;"></div></p>`;
-    document.getElementById("userInput").value = `Video selected: ${file.name}. What do you want to know about it?`;
+    contentDiv.innerHTML = `<p>Video selected: <strong>${file.name}</strong> <div data-lucide="video" style="display:inline-block; vertical-align:middle; width:20px; height:20px; stroke:#fff;"></div></p><p>Video analysis is not fully supported yet. Please ask a general question about the video.</p>`;
     lucide.createIcons();
-  }
-  else {
-    contentDiv.innerHTML = `<p>Unsupported file type: ${file.name}. Please choose an image, text, PDF, or video file.</p>`;
-    document.getElementById("userInput").value = `Unsupported file type: ${file.name}.`;
+    inputElement.value = `Video "${file.name}" uploaded. What do you want to know about it?`;
+    // For video, we just store a placeholder and rely on user's prompt
+    inputElement.dataset.fileData = `User uploaded a video: ${file.name}`;
+    adjustTextareaHeight(inputElement);
+  } else {
+    contentDiv.innerHTML = `<p>Unsupported file type: <strong>${file.name}</strong>. Please choose an image, text, PDF, or video file.</p>`;
+    inputElement.value = `Unsupported file type: ${file.name}.`;
+    delete inputElement.dataset.fileData;
+    delete inputElement.dataset.fileType;
+    delete inputElement.dataset.fileName;
   }
   chatBox.scrollTop = chatBox.scrollHeight;
   fileInput.value = ''; // Clear the file input after selection
@@ -306,17 +378,16 @@ function startVoiceRecognition() {
   }
 }
 
-// Canvas feature placeholder
+// Canvas feature
 function launchCanvas() {
     // This will open a new window/tab with your canvas application
-    // You need to create canvas.html and canvas.js files separately
-    window.open('canvas.html', '_blank', 'width=800,height=600,resizable=yes,scrollbars=yes');
-    alert("Canvas feature is launched in a new window/tab! (Requires canvas.html and canvas.js)");
+    // You need to create canvas.html and canvas.js files separately in the public directory
+    window.open('/canvas.html', '_blank', 'width=800,height=600,resizable=yes,scrollbars=yes');
 }
 
 // Placeholder for other sidebar functions
 function openSettings() {
-    alert("Settings will be implemented here!");
+    alert("Settings functionality will be implemented here!");
 }
 function logout() {
     alert("Logout functionality will be implemented here!");
@@ -336,8 +407,8 @@ window.onload = () => {
   const userInput = document.getElementById("userInput");
   userInput.addEventListener("input", () => adjustTextareaHeight(userInput)); // Auto-resize textarea
   userInput.addEventListener("keypress", (event) => {
-    if (event.key === "Enter" && !event.shiftKey) {
-      event.preventDefault();
+    if (event.key === "Enter" && !event.shiftKey) { // Check for Enter key without Shift
+      event.preventDefault(); // Prevent new line in textarea
       search();
     }
   });
@@ -350,7 +421,3 @@ window.onload = () => {
 
   console.log("App initialized. Current model:", CURRENT_MODEL_NAME);
 };
-
-// Add marked.js for Markdown rendering (include it from CDN in index.html head)
-// <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-// Make sure to add this script tag in your index.html
