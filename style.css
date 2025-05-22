@@ -30,6 +30,7 @@ body {
   justify-content: space-between;
   border-right: 1px solid #333;
   flex-shrink: 0; /* Prevent sidebar from shrinking */
+  transition: width 0.3s ease; /* Smooth transition for sidebar collapse */
 }
 
 .new-chat-btn {
