@@ -21,30 +21,54 @@ let currentModelIndex = 0;
 let CURRENT_MODEL = AVAILABLE_MODELS[currentModelIndex].id;
 let CURRENT_MODEL_NAME = AVAILABLE_MODELS[currentModelIndex].name;
 
-const chatHistory = [];
+const chatHistory = []; // Stores objects like { role: "user", content: "..." } or { role: "assistant", content: "..." }
 
 function switchModel() {
   currentModelIndex = (currentModelIndex + 1) % AVAILABLE_MODELS.length;
   CURRENT_MODEL = AVAILABLE_MODELS[currentModelIndex].id;
   CURRENT_MODEL_NAME = AVAILABLE_MODELS[currentModelIndex].name;
-  document.getElementById('modelSelector').textContent = CURRENT_MODEL_NAME;
+  document.getElementById('modelSelector').textContent = AVAILABLE_MODELS[currentModelIndex].shortName; // Show short name
   console.log("Switched model to:", CURRENT_MODEL_NAME);
 }
 
+// Function to start a new chat (clears history and UI)
+function startNewChat() {
+    chatHistory.length = 0; // Clear the array
+    updateChatHistory(); // Update UI
+    // Show the initial message
+    const chatBox = document.getElementById("chatBox");
+    chatBox.innerHTML = `
+        <div class="initial-message">
+            <div class="title">ᖴᒪ.ᗩI</div>
+            <div class="subtitle">Your AI Companion</div>
+            <p>How can I help you today?</p>
+        </div>
+    `;
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+// Function to handle sending messages
 async function search() {
   const inputElement = document.getElementById("userInput");
   const input = inputElement.value.trim();
   if (!input) return;
+
+  // Remove initial message if present
+  const initialMessageDiv = document.querySelector('.initial-message');
+  if (initialMessageDiv) {
+      initialMessageDiv.remove();
+  }
 
   let messageContent = [];
   let displayInput = input;
   const imageUrlRegex = /\bhttps?:\/\/\S+\.(?:png|jpg|jpeg|gif|webp)\b/i;
   const imageMatch = input.match(imageUrlRegex);
 
-  // Check if the input starts with "Image file selected:" or "Text file selected:"
-  const isFileUploadInstruction = input.startsWith("Image file selected:") || input.startsWith("Text file selected:");
+  // Check if the input starts with a file instruction (from uploadFile)
+  const isFileUploadInstruction = input.startsWith("Image selected:") || input.startsWith("Text file selected:") || input.startsWith("PDF selected:") || input.startsWith("Video selected:");
 
   if (imageMatch) {
+    // If a direct image URL is pasted in input
     messageContent.push({
       "type": "image_url",
       "image_url": { "url": imageMatch[0] }
@@ -60,13 +84,14 @@ async function search() {
       displayInput = `Image: ${imageMatch[0]} (Instruction: ${defaultText})`;
     }
   } else if (isFileUploadInstruction) {
-    // If it's a file upload instruction, try to extract actual content for AI if possible
+    // If a file was uploaded and instruction set by uploadFile
     // For now, we'll just pass the instruction as text.
-    // A more advanced solution would involve sending the file data to the backend.
+    // Full file content handling needs backend changes.
     messageContent.push({ "type": "text", "text": input });
     displayInput = input;
   }
   else {
+    // Regular text input
     messageContent.push({ "type": "text", "text": input });
     displayInput = input;
   }
@@ -74,6 +99,7 @@ async function search() {
   chatHistory.push({ role: "user", content: displayInput });
   updateChatHistory();
   inputElement.value = ""; // Clear input field
+  adjustTextareaHeight(inputElement); // Reset textarea height
   showLoadingIndicator();
 
   try {
@@ -85,8 +111,9 @@ async function search() {
       body: JSON.stringify({
         model: CURRENT_MODEL,
         messages: [
-          ...chatHistory.slice(-10).map(msg => ({
+          ...chatHistory.slice(-10).map(msg => ({ // Send last 10 messages for context
             role: msg.role,
+            // Ensure content is an array for multimodal support in backend
             content: typeof msg.content === 'string' ? [{ type: 'text', text: msg.content }] : msg.content
           })),
           { role: "user", content: messageContent }
@@ -113,32 +140,53 @@ async function search() {
   }
 }
 
+// Function to update chat history in UI
 function updateChatHistory() {
   const chatBox = document.getElementById("chatBox");
-  chatBox.innerHTML = "";
+  chatBox.innerHTML = ""; // Clear existing content
   chatHistory.forEach((message) => {
     const messageDiv = document.createElement("div");
     messageDiv.className = message.role === "user" ? "user-message" : "ai-message";
-    // Check if message.content is an array (for multi-part messages like image_url + text)
-    // If it's an array, display only the text part if available, or a generic message.
-    if (Array.isArray(message.content)) {
+
+    const avatarDiv = document.createElement("div");
+    avatarDiv.className = "message-avatar";
+    avatarDiv.textContent = message.role === "user" ? "You" : "AI"; // Simple avatar text
+
+    const contentDiv = document.createElement("div");
+    contentDiv.className = "message-content";
+
+    // Handle HTML content (like generated images) vs plain text
+    if (typeof message.content === 'string' && message.content.includes('<img src=')) { // Simple check for image HTML
+        contentDiv.innerHTML = message.content;
+    } else if (Array.isArray(message.content)) {
+      // For multi-part messages, display text or a generic message
       const textPart = message.content.find(part => part.type === 'text');
-      messageDiv.innerHTML = textPart ? textPart.text : "User sent an image/file.";
+      contentDiv.innerHTML = marked.parse(textPart ? textPart.text : "User sent an image/file."); // Use Marked for Markdown
     } else {
-      messageDiv.innerHTML = message.content;
+      contentDiv.innerHTML = marked.parse(message.content); // Use Marked for Markdown
     }
+    
+    messageDiv.appendChild(avatarDiv);
+    messageDiv.appendChild(contentDiv);
     chatBox.appendChild(messageDiv);
   });
   chatBox.scrollTop = chatBox.scrollHeight;
 }
 
+// Textarea auto-resize
+function adjustTextareaHeight(textarea) {
+    textarea.style.height = 'auto'; // Reset height
+    textarea.style.height = textarea.scrollHeight + 'px'; // Set to scroll height
+}
+
+// Loading indicator functions
 function showLoadingIndicator() {
   hideLoadingIndicator();
   const chatBox = document.getElementById("chatBox");
   const loadingDiv = document.createElement("div");
   loadingDiv.id = "loadingIndicator";
   loadingDiv.className = "ai-message";
-  loadingDiv.innerHTML = `<div class="loading-spinner"></div> Processing...`;
+  loadingDiv.innerHTML = `<div class="message-avatar">AI</div><div class="message-content"><div class="loading-spinner"></div> Processing...</div>`;
   chatBox.appendChild(loadingDiv);
   chatBox.scrollTop = chatBox.scrollHeight;
 }
@@ -148,26 +196,63 @@ function hideLoadingIndicator() {
   if (loadingDiv) loadingDiv.remove();
 }
 
+// File upload handling and preview
 function uploadFile() {
   const fileInput = document.getElementById("fileUpload");
   const file = fileInput.files[0];
   if (!file) return;
 
+  const chatBox = document.getElementById("chatBox");
+  const previewDiv = document.createElement("div");
+  previewDiv.className = "file-preview ai-message"; // Style like an AI message for consistency
+  chatBox.appendChild(previewDiv); // Add to chatBox for visual feedback
+
+  const avatarDiv = document.createElement("div");
+  avatarDiv.className = "message-avatar";
+  avatarDiv.textContent = "AI"; // AI's response to file upload
+
+  const contentDiv = document.createElement("div");
+  contentDiv.className = "message-content";
+  previewDiv.appendChild(avatarDiv);
+  previewDiv.appendChild(contentDiv);
+
   if (file.type.startsWith('image/')) {
-    document.getElementById("userInput").value = `Image file selected: ${file.name}. Please enter your question or instruction regarding the image.`;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = document.createElement("img");
+      img.src = event.target.result;
+      img.alt = "Uploaded image preview";
+      contentDiv.innerHTML = `<p>Image ready: ${file.name}</p>`;
+      contentDiv.appendChild(img);
+      document.getElementById("userInput").value = `Image selected: ${file.name}. Please enter your question or instruction regarding the image.`;
+    };
+    reader.readAsDataURL(file);
+  } else if (file.type === 'application/pdf') {
+    contentDiv.innerHTML = `<p>PDF selected: ${file.name} <div data-lucide="file-text" style="display:inline-block; vertical-align:middle; width:20px; height:20px; stroke:#fff;"></div></p>`;
+    document.getElementById("userInput").value = `PDF selected: ${file.name}. Please ask questions about its content.`;
+    lucide.createIcons();
   } else if (file.type.startsWith('text/')) {
     const reader = new FileReader();
     reader.onload = (event) => {
       const content = event.target.result;
-      document.getElementById("userInput").value = `Text file selected: ${file.name}. Content snippet:\n\n${content.substring(0, 200)}...\n\nPlease enter your question or instruction regarding this text.`;
+      contentDiv.innerHTML = `<p>Text file selected: ${file.name}</p><textarea readonly>${content.substring(0, 300)}...</textarea>`;
+      document.getElementById("userInput").value = `Text file selected: ${file.name}. Content snippet ready. Ask your question.`;
     };
     reader.readAsText(file);
-  } else {
-    document.getElementById("userInput").value = `Unsupported file type selected: ${file.name}. Please choose an image or text file.`;
+  } else if (file.type.startsWith('video/')) {
+    contentDiv.innerHTML = `<p>Video selected: ${file.name} <div data-lucide="video" style="display:inline-block; vertical-align:middle; width:20px; height:20px; stroke:#fff;"></div></p>`;
+    document.getElementById("userInput").value = `Video selected: ${file.name}. What do you want to know about it?`;
+    lucide.createIcons();
   }
+  else {
+    contentDiv.innerHTML = `<p>Unsupported file type: ${file.name}. Please choose an image, text, PDF, or video file.</p>`;
+    document.getElementById("userInput").value = `Unsupported file type: ${file.name}.`;
+  }
+  chatBox.scrollTop = chatBox.scrollHeight;
   fileInput.value = ''; // Clear the file input after selection
 }
 
+// Voice recognition
 function startVoiceRecognition() {
   if (!('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
     chatHistory.push({ role: "assistant", content: "Voice input not supported in your browser. Please ensure you are using HTTPS." });
@@ -177,7 +262,7 @@ function startVoiceRecognition() {
 
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   const recognition = new SpeechRecognition();
-  recognition.lang = "auto"; // Attempt to detect language automatically
+  recognition.lang = "auto"; // Auto-detect language
   recognition.interimResults = false;
   recognition.maxAlternatives = 1;
 
@@ -221,25 +306,51 @@ function startVoiceRecognition() {
   }
 }
 
+// Canvas feature placeholder
+function launchCanvas() {
+    // This will open a new window/tab with your canvas application
+    // You need to create canvas.html and canvas.js files separately
+    window.open('canvas.html', '_blank', 'width=800,height=600,resizable=yes,scrollbars=yes');
+    alert("Canvas feature is launched in a new window/tab! (Requires canvas.html and canvas.js)");
+}
+
+// Placeholder for other sidebar functions
+function openSettings() {
+    alert("Settings will be implemented here!");
+}
+function logout() {
+    alert("Logout functionality will be implemented here!");
+}
+function loadChatHistory(chatId) {
+    // This would load a specific chat from storage/backend
+    alert(`Loading chat history for ID: ${chatId}`);
+    // Example: chatHistory = savedChats[chatId]; updateChatHistory();
+}
+
 // Initialize buttons and input handlers
 window.onload = () => {
-  lucide.createIcons();
-  document.getElementById('modelSelector').textContent = CURRENT_MODEL_NAME;
+  lucide.createIcons(); // Initializes icons
+  document.getElementById('modelSelector').textContent = AVAILABLE_MODELS[currentModelIndex].shortName; // Show short name
   document.getElementById('modelSelector').addEventListener('click', switchModel);
 
-  // ✅ ENTER key to trigger search
-  document.getElementById("userInput").addEventListener("keypress", (event) => {
+  const userInput = document.getElementById("userInput");
+  userInput.addEventListener("input", () => adjustTextareaHeight(userInput)); // Auto-resize textarea
+  userInput.addEventListener("keypress", (event) => {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       search();
     }
   });
 
-  // ✅ Dynamic buttons
-  // sendButton এর জন্য ইভেন্ট লিসেনার যোগ করা হয়েছে
+  // Event listeners for buttons
   document.getElementById("sendButton").addEventListener("click", search);
   document.getElementById("fileUpload").addEventListener("change", uploadFile);
   document.getElementById("voiceIcon").addEventListener("click", startVoiceRecognition);
+  // Sidebar buttons already have onclick in HTML
 
   console.log("App initialized. Current model:", CURRENT_MODEL_NAME);
 };
+
+// Add marked.js for Markdown rendering (include it from CDN in index.html head)
+// <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+// Make sure to add this script tag in your index.html
