@@ -10,26 +10,66 @@
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
-  <div class="container">
-    <div class="title">ᖴᒪ.ᗩI</div>
-    <div class="subtitle">Your AI Companion</div>
-    <div class="chat-box" id="chatBox">
-    </div>
-    <div class="input-wrapper">
-      <input type="text" id="userInput" placeholder="Ask anything..." />
-      <div class="icon-btn" title="Voice Input" id="voiceIcon">
-        <div data-lucide="mic"></div>
+  <div class="app-container">
+    <aside class="sidebar">
+      <button class="new-chat-btn" onclick="startNewChat()">
+        <div data-lucide="plus"></div>
+        New Chat
+      </button>
+      <div class="chat-history">
+        </div>
+      <div class="sidebar-bottom">
+        <button class="sidebar-btn" onclick="openSettings()">
+          <div data-lucide="settings"></div>
+          Settings
+        </button>
+        <button class="sidebar-btn" onclick="logout()">
+          <div data-lucide="log-out"></div>
+          Log out
+        </button>
       </div>
-      <label class="icon-btn file-upload" for="fileUpload" title="Upload File">
-        <div data-lucide="paperclip"></div>
-        <input type="file" id="fileUpload" />
-      </label>
-      <div class="model-selector" id="modelSelector">
+    </aside>
+
+    <main class="chat-main">
+      <div class="chat-box" id="chatBox">
+        <div class="initial-message">
+          <div class="title">ᖴᒪ.ᗩI</div>
+          <div class="subtitle">Your AI Companion</div>
+          <p>How can I help you today?</p>
+        </div>
       </div>
-      <div class="icon-btn" id="sendButton" title="Send">
-        <div data-lucide="send"></div>
+
+      <div class="input-area-wrapper">
+        <div class="input-wrapper">
+          <textarea id="userInput" placeholder="Message FL.AI..." rows="1"></textarea>
+          <div class="icon-btn" title="Voice Input" id="voiceIcon">
+            <div data-lucide="mic"></div>
+          </div>
+          <label class="icon-btn file-upload" for="fileUpload" title="Upload File">
+            <div data-lucide="paperclip"></div>
+            <input type="file" id="fileUpload" />
+          </label>
+          <div class="model-selector" id="modelSelector">
+            </div>
+          <div class="icon-btn send-btn" id="sendButton" title="Send">
+            <div data-lucide="send"></div>
+          </div>
+        </div>
+        <div class="feature-buttons">
+          <button class="feature-btn" onclick="launchCanvas()">
+            <div data-lucide="shapes"></div>
+            Canvas
+          </button>
+          <button class="feature-btn" onclick="alert('Deep Research is enabled via your prompts! Ask a question requiring latest info.');">
+            <div data-lucide="search"></div>
+            Deep Research Info
+          </button>
+        </div>
+        <div class="disclaimer">
+          FL.AI can make mistakes. Consider checking important information.
+        </div>
       </div>
-    </div>
+    </main>
   </div>
 
   <script src="script.js"></script>
