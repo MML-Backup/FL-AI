@@ -5,12 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FL.AI Canvas</title>
     <style>
-        body { margin: 0; overflow: hidden; background-color: #1a1a1a; display: flex; justify-content: center; align-items: center; height: 100vh; }
-        canvas { border: 1px solid #0d6efd; background-color: #2a2a2a; }
+        body { margin: 0; overflow: hidden; background-color: #1a1a1a; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; color: #fff; }
+        canvas { border: 1px solid #0d6efd; background-color: #2a2a2a; cursor: crosshair; }
+        .controls { margin-bottom: 10px; display: flex; gap: 10px; }
+        .controls button, .controls input[type="color"] {
+            padding: 8px 15px;
+            background-color: #0d6efd;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s ease;
+        }
+        .controls button:hover {
+            background-color: #0b5ed7;
+        }
+        .controls input[type="color"] {
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            border: none;
+            background: none;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
-    <canvas id="myCanvas" width="700" height="500"></canvas>
+    <div class="controls">
+        <input type="color" id="colorPicker" value="#FFFFFF">
+        <button id="clearCanvas">Clear</button>
+    </div>
+    <canvas id="myCanvas" width="800" height="600"></canvas>
     <script src="canvas.js"></script>
 </body>
 </html>
