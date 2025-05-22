@@ -1,34 +1,44 @@
 document.addEventListener('DOMContentLoaded', () => {
     const canvas = document.getElementById('myCanvas');
     const ctx = canvas.getContext('2d');
+    const colorPicker = document.getElementById('colorPicker');
+    const clearButton = document.getElementById('clearCanvas');
 
     let isDrawing = false;
     let lastX = 0;
     let lastY = 0;
 
-    ctx.strokeStyle = '#FFFFFF'; // Default stroke color (white)
-    ctx.lineWidth = 2;
+    // Initial canvas setup
+    ctx.strokeStyle = colorPicker.value;
+    ctx.lineWidth = 3; // Thicker default line for better visibility
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 
-    canvas.addEventListener('mousedown', (e) => {
-        isDrawing = true;
-        [lastX, lastY] = [e.offsetX, e.offsetY];
-    });
-
-    canvas.addEventListener('mousemove', (e) => {
+    function draw(e) {
         if (!isDrawing) return;
         ctx.beginPath();
         ctx.moveTo(lastX, lastY);
         ctx.lineTo(e.offsetX, e.offsetY);
         ctx.stroke();
         [lastX, lastY] = [e.offsetX, e.offsetY];
+    }
+
+    canvas.addEventListener('mousedown', (e) => {
+        isDrawing = true;
+        [lastX, lastY] = [e.offsetX, e.offsetY];
     });
 
+    canvas.addEventListener('mousemove', draw);
     canvas.addEventListener('mouseup', () => isDrawing = false);
-    canvas.addEventListener('mouseout', () => isDrawing = false);
+    canvas.addEventListener('mouseout', () => isDrawing = false); // Stop drawing if mouse leaves canvas
 
-    // Basic controls example (you can add more sophisticated tools)
-    // For example, buttons for changing color, line width, etc.
-    // console.log("Canvas initialized. Start drawing!");
+    colorPicker.addEventListener('change', (e) => {
+        ctx.strokeStyle = e.target.value;
+    });
+
+    clearButton.addEventListener('click', () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the entire canvas
+    });
+
+    console.log("Canvas initialized. Start drawing!");
 });
