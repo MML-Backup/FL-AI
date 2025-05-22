@@ -1,3 +1,4 @@
+/* General reset and base styles */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -10,119 +11,312 @@ body {
   color: #fff;
   height: 100vh;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 20px;
-  overflow: hidden; /* prevent scroll unless really needed */
+  overflow: hidden; /* Prevent body scroll */
 }
 
-.container {
-  text-align: center;
-  max-width: 700px;
+.app-container {
+  display: flex;
   width: 100%;
+  height: 100%;
+}
+
+/* Sidebar styles */
+.sidebar {
+  width: 260px;
+  background-color: #202123;
+  padding: 10px;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start; /* Align items to the start (top) */
-  align-items: center;     /* horizontally center inside container */
-  flex-grow: 1; /* Allow container to take up available space in body */
+  justify-content: space-between;
+  border-right: 1px solid #333;
+  flex-shrink: 0; /* Prevent sidebar from shrinking */
 }
 
-.title {
-  font-size: 32px;
-  font-weight: 600;
-  color: #0d6efd;
-  margin-bottom: 5px;
-}
-
-.subtitle {
+.new-chat-btn {
+  background-color: transparent;
+  border: 1px solid #555;
+  color: #fff;
+  padding: 10px 15px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
   font-size: 16px;
+  margin-bottom: 10px;
+  transition: background-color 0.2s ease;
+}
+
+.new-chat-btn:hover {
+  background-color: #333;
+}
+
+.new-chat-btn svg {
+  stroke: #fff;
+  width: 20px;
+  height: 20px;
+}
+
+.chat-history {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding-right: 5px; /* For scrollbar */
+}
+
+.chat-history-item {
+  padding: 10px;
   color: #bbb;
-  margin-bottom: 25px;
+  cursor: pointer;
+  border-radius: 6px;
+  margin-bottom: 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: background-color 0.2s ease;
+}
+
+.chat-history-item:hover {
+  background-color: #333;
+}
+
+.sidebar-bottom {
+  padding-top: 10px;
+  border-top: 1px solid #333;
+}
+
+.sidebar-btn {
+  background-color: transparent;
+  border: none;
+  color: #fff;
+  padding: 10px 0;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.2s ease;
+}
+
+.sidebar-btn:hover {
+  background-color: #333;
+}
+
+.sidebar-btn svg {
+  stroke: #fff;
+  width: 20px;
+  height: 20px;
+}
+
+/* Chat Main Area */
+.chat-main {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: #343541;
+  position: relative;
 }
 
 .chat-box {
-  background-color: #1a1a1a;
-  border-radius: 16px;
+  flex-grow: 1;
+  overflow-y: auto;
   padding: 20px;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
-  /* flex-grow 1 সরিয়ে নির্দিষ্ট height ও width সেট করা হলো */
-  /* flex-grow: 1; */
-  height: 350px; /* চ্যাটবক্সের নির্দিষ্ট উচ্চতা */
-  width: 600px; /* চ্যাটবক্সের নির্দিষ্ট চওড়া */
-  overflow-y: auto; /* Add scrollbar when content overflows */
-  /* margin-bottom remove করা হয়েছে */
-  display: flex; /* Use flexbox for chat messages */
-  flex-direction: column; /* Stack messages vertically */
-  /* max-height remove করা হয়েছে আগের উত্তরেই */
+  padding-bottom: 150px; /* Space for input area */
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center initial message */
 }
 
-/* Adjust height/width for chat-box on larger screens if needed */
-@media (min-width: 601px) {
-    .chat-box {
-        height: 400px; /* উদাহরণ: বড় স্ক্রিনের জন্য উচ্চতা */
-        width: 600px; /* বড় স্ক্রিনের জন্য চওড়া */
-    }
+.initial-message {
+  text-align: center;
+  margin-top: auto; /* Push to center */
+  margin-bottom: auto; /* Push to center */
+}
+
+.initial-message .title {
+  font-size: 40px;
+  font-weight: 600;
+  color: #0d6efd;
+  margin-bottom: 10px;
+}
+
+.initial-message .subtitle {
+  font-size: 18px;
+  color: #bbb;
+}
+
+.user-message, .ai-message {
+  max-width: 768px; /* Max width for readability */
+  width: 100%;
+  padding: 15px 20px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  text-align: left;
+  word-wrap: break-word;
+  font-size: 16px;
+  line-height: 1.5;
+  display: flex; /* Use flex for user/AI icon alignment */
+  gap: 10px;
+}
+
+.user-message {
+  background-color: #343541; /* No background for user messages as in ChatGPT */
+  color: #fff;
+  align-self: flex-end; /* Align right for user messages */
+  border-bottom: 1px solid #444; /* Separator like ChatGPT */
+  margin-left: auto; /* Push to right */
+}
+
+.ai-message {
+  background-color: #444654; /* Background for AI messages */
+  color: #e2e2e2;
+  align-self: flex-start; /* Align left for AI messages */
+  border-bottom: 1px solid #555; /* Separator */
+  margin-right: auto; /* Push to left */
+}
+
+/* User/AI avatar/icon */
+.message-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #0d6efd; /* Example color */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+    font-weight: bold;
+    color: #fff;
+    flex-shrink: 0; /* Prevent shrinking */
+}
+.message-content {
+    flex-grow: 1;
+}
+
+/* Markdown rendering (simplified) */
+.ai-message pre {
+  background-color: #282c34;
+  padding: 10px;
+  border-radius: 5px;
+  overflow-x: auto;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.ai-message code {
+  font-family: 'Fira Code', 'Roboto Mono', monospace;
+  color: #abb2bf;
+}
+
+.ai-message p:last-child {
+  margin-bottom: 0;
+}
+
+/* AI generated images */
+.ai-message img {
+    max-width: 100%;
+    border-radius: 8px;
+    margin-top: 10px;
+    height: auto;
+}
+
+/* Input Area */
+.input-area-wrapper {
+  background-color: #343541;
+  padding: 20px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: absolute; /* Position at bottom */
+  bottom: 0;
+  left: 0;
+  right: 0;
 }
 
 .input-wrapper {
   display: flex;
-  align-items: center;
-  background-color: #2a2a2a;
-  border-radius: 999px;
-  padding: 12px 18px;
-  gap: 12px;
-  flex-shrink: 0; /* Prevent input-wrapper from shrinking */
-  width: 100%; /* Ensure input wrapper takes full width */
-  flex-wrap: wrap; /* Allow items to wrap to the next line if space is insufficient */
+  align-items: flex-end; /* Align items to bottom for textarea expansion */
+  background-color: #40414F;
+  border-radius: 12px;
+  padding: 10px;
+  gap: 8px;
+  width: 100%;
+  max-width: 768px; /* Match chat bubble max-width */
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+  margin-bottom: 10px;
 }
 
-.input-wrapper input {
-  flex: 1; /* Allow input to grow and take available space */
+.input-wrapper textarea {
+  flex: 1;
   background: transparent;
   border: none;
   color: #fff;
   font-size: 16px;
   outline: none;
-  min-width: 150px; /* Minimum width for usability */
+  resize: none; /* Disable manual resize */
+  min-height: 24px; /* single line height */
+  max-height: 200px; /* Max height before scroll */
+  overflow-y: auto;
+  line-height: 1.5;
+  padding-top: 5px; /* Adjust padding for better look */
+  padding-bottom: 5px; /* Adjust padding for better look */
 }
 
 .icon-btn {
-  background-color: #3b3b3b;
+  background-color: transparent; /* No background */
   border: none;
   border-radius: 50%;
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
+  min-width: 32px; /* Fixed size */
+  min-height: 32px; /* Fixed size */
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  flex-shrink: 0; /* Prevent icons from shrinking */
+  flex-shrink: 0;
+  transition: background-color 0.2s ease;
 }
 
 .icon-btn:hover {
-  background-color: #555;
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .icon-btn svg {
-  stroke: #fff;
-  width: 18px;
-  height: 18px;
+  stroke: #b3b3b3; /* Lighter grey stroke */
+  width: 20px;
+  height: 20px;
 }
+
+.send-btn {
+    background-color: #0d6efd; /* Blue send button */
+}
+.send-btn:hover {
+    background-color: #0b5ed7;
+}
+.send-btn svg {
+    stroke: #fff;
+}
+
 
 .file-upload input[type="file"] {
   display: none;
 }
 
-/* মডেল সিলেকশন বাটনের স্টাইল */
 .model-selector {
-  padding: 8px 12px;
+  padding: 6px 10px;
   background-color: #3b3b3b;
   border-radius: 999px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 13px;
   color: #fff;
   white-space: nowrap;
-  flex-shrink: 0; /* Prevent selector from shrinking */
+  flex-shrink: 0;
   transition: background-color 0.2s ease;
 }
 
@@ -130,30 +324,39 @@ body {
   background-color: #555;
 }
 
-.user-message {
-  background-color: #0d6efd;
-  color: #fff;
-  padding: 10px;
-  border-radius: 8px;
-  margin-bottom: 10px;
-  text-align: right;
-  word-wrap: break-word;
-  align-self: flex-end; /* Align user messages to the right */
-  max-width: 80%; /* Limit width */
+.feature-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+.feature-btn {
+    background-color: #2a2a2a;
+    color: #fff;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: background-color 0.2s ease;
+}
+.feature-btn:hover {
+    background-color: #3b3b3b;
+}
+.feature-btn svg {
+    stroke: #fff;
+    width: 16px;
+    height: 16px;
 }
 
-.ai-message {
-  background-color: #1f1f1f;
-  color: #e2e2e2;
-  padding: 10px;
-  border-radius: 8px;
-  margin-bottom: 10px;
-  text-align: left;
-  word-wrap: break-word;
-  align-self: flex-start; /* Align AI messages to the left */
-  max-width: 80%; /* Limit width */
+.disclaimer {
+  font-size: 12px;
+  color: #888;
+  text-align: center;
+  margin-top: 5px;
 }
-
 
 .loading-spinner {
   border: 4px solid #f3f3f3;
@@ -164,7 +367,7 @@ body {
   animation: spin 1s linear infinite;
   display: inline-block;
   margin-right: 8px;
-  vertical-align: middle; /* Align spinner with text */
+  vertical-align: middle;
 }
 
 @keyframes spin {
@@ -176,96 +379,78 @@ body {
   }
 }
 
-/* --- মোবাইল স্ক্রিনের জন্য মিডিয়া ক্যোয়ারি --- */
-/* যখন স্ক্রিনের সর্বোচ্চ প্রস্থ 600px বা তার কম হবে */
-@media (max-width: 600px) {
-  body {
-      padding: 10px; /* Reduce padding on small screens */
-  }
-
-  .container {
-      padding: 0; /* Remove container padding as body has padding */
-      justify-content: flex-start;
-  }
-
-  .title {
-    font-size: 24px; /* Smaller font size for title */
-  }
-
-  .subtitle {
-    font-size: 14px; /* Smaller font size for subtitle */
-  }
-
-  .chat-box {
-      padding: 15px; /* Slightly less padding for chat box */
-      height: 250px; /* মোবাইল স্ক্রিনের জন্য উচ্চতা */
-      width: 100%; /* মোবাইল স্ক্রিনে পুরো চওড়া */
-      /* max-height remove করা হয়েছে আগের উত্তরেই */
-      /* margin-bottom remove করা হয়েছে */
-  }
-
-  .input-wrapper {
-    flex-direction: row; /* Keep items in a row */
-    flex-wrap: wrap; /* Allow items to wrap */
-    align-items: center; /* Align items vertically in the center */
-    padding: 6px 10px; /* Further reduce padding */
-    gap: 4px; /* Further reduce gap between items */
-    border-radius: 999px; /* Keep pill shape */
-  }
-
-  .input-wrapper input {
+/* File preview styles */
+.file-preview {
+  background-color: #2a2a2a;
+  border-radius: 8px;
+  padding: 10px;
+  margin-top: 15px;
+  margin-bottom: 10px;
+  color: #e2e2e2;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  max-width: 80%;
+  align-self: flex-start; /* Align to left like AI messages */
+}
+.file-preview img, .file-preview textarea {
+    margin-top: 5px;
+    border: 1px solid #3b3b3b;
+    width: auto;
+}
+.file-preview img {
+    max-width: 150px;
+    max-height: 150px;
+    border-radius: 8px;
+}
+.file-preview textarea {
+    width: 100%;
+    height: 80px;
+    background:#2a2a2a;
+    color:#fff;
+    border:none;
+    border-radius:4px;
+    padding:5px;
     font-size: 14px;
-    padding: 4px 6px; /* Further reduce input padding */
-    min-width: 50px; /* Further reduce min-width */
-    flex-grow: 1; /* Allow input to grow */
-    flex-basis: auto;
+    resize: vertical;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 60px; /* Collapse sidebar on small screens */
+    padding: 10px 5px;
   }
-
-    .icon-btn,
-    .file-upload label { /* Apply common styles to icon buttons and file upload label */
-      width: 30px; /* Further reduce button width */
-      height: 30px; /* Further reduce button height */
-      padding: 0;
-      border-radius: 50%;
-      flex-shrink: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-      .icon-btn svg {
-        width: 16px; /* Adjust svg size */
-        height: 16px; /* Adjust svg size */
-      }
-
-
-      /* Model selector specific styles */
-       .model-selector {
-          padding: 4px 8px; /* Further reduce padding */
-          font-size: 12px; /* Further reduce font size */
-          white-space: nowrap;
-          flex-shrink: 0; /* Prevent shrinking */
-          background-color: #3b3b3b;
-          border-radius: 999px;
-          cursor: pointer;
-          color: #fff;
-          transition: background-color 0.2s ease;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          /* flex-basis: auto; /* Allow flex basis to be determined by content */
-          /* min-width: unset; /* Remove min-width to allow shrinking */
-          /* width: auto; /* Allow width to adjust */
-       }
-
-
-      .user-message,
-      .ai-message {
-          max-width: 95%; /* Allow messages to take more width on very small screens */
-      }
-
-    /* Optional: If flex-wrap happens, add some spacing to the wrapped line */
-    /* .input-wrapper > *:last-child {
-        margin-top: 4px; /* Add margin to the top of wrapped items */
-    /* } */
+  .sidebar .new-chat-btn,
+  .sidebar .sidebar-btn {
+    justify-content: center;
+    padding: 10px 0;
+  }
+  .sidebar .new-chat-btn span,
+  .sidebar .sidebar-btn span {
+    display: none; /* Hide text, show only icon */
+  }
+  .chat-main {
+    width: calc(100% - 60px); /* Adjust main content width */
+  }
+  .chat-box {
+    padding: 15px;
+  }
+  .input-area-wrapper {
+    padding: 15px;
+  }
+  .input-wrapper {
+    flex-wrap: wrap; /* Allow buttons to wrap */
+    justify-content: center;
+  }
+  .input-wrapper > *:not(textarea) {
+    margin-top: 5px; /* Add margin if buttons wrap */
+  }
+  .initial-message .title {
+    font-size: 32px;
+  }
+  .initial-message .subtitle {
+    font-size: 16px;
+  }
 }
