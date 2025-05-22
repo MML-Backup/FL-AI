@@ -8,24 +8,26 @@
   <link rel="manifest" href="/manifest.json">
   <link rel="stylesheet" href="style.css">
   <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
 </head>
 <body>
   <div class="app-container">
     <aside class="sidebar">
       <button class="new-chat-btn" onclick="startNewChat()">
         <div data-lucide="plus"></div>
-        New Chat
+        <span>New Chat</span>
       </button>
       <div class="chat-history">
         </div>
       <div class="sidebar-bottom">
         <button class="sidebar-btn" onclick="openSettings()">
           <div data-lucide="settings"></div>
-          Settings
+          <span>Settings</span>
         </button>
         <button class="sidebar-btn" onclick="logout()">
           <div data-lucide="log-out"></div>
-          Log out
+          <span>Log out</span>
         </button>
       </div>
     </aside>
@@ -47,7 +49,7 @@
           </div>
           <label class="icon-btn file-upload" for="fileUpload" title="Upload File">
             <div data-lucide="paperclip"></div>
-            <input type="file" id="fileUpload" />
+            <input type="file" id="fileUpload" accept="image/*,application/pdf,text/plain,video/*" />
           </label>
           <div class="model-selector" id="modelSelector">
             </div>
@@ -60,7 +62,7 @@
             <div data-lucide="shapes"></div>
             Canvas
           </button>
-          <button class="feature-btn" onclick="alert('Deep Research is enabled via your prompts! Ask a question requiring latest info.');">
+          <button class="feature-btn" onclick="alert('Deep Research is enabled! Ask a question requiring latest information or external data, e.g., \"Research the latest advancements in AI.\"');">
             <div data-lucide="search"></div>
             Deep Research Info
           </button>
